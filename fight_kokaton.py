@@ -243,7 +243,6 @@ def main():
                 return
         for x, bomb in enumerate(bombs):
             for y, beam in enumerate(beams):
-                # skip if already removed
                 if beam is None or bomb is None:
                     continue
                 if beam.rct.colliderect(bomb.rct):
