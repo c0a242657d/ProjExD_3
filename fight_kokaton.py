@@ -253,6 +253,7 @@ def main():
                     bird.change_img(6, screen)
                     score.score += 1  # スコアを1点加算
                     pg.display.update()
+                    break
         
         for y, beam in enumerate(beams):
             if beam is None:
