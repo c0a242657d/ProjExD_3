@@ -249,7 +249,7 @@ def main():
                     # ビームが爆弾に当たったら爆弾とビームを消す
                     bombs[x] = None
                     beams[y] = None
-                    exceptions.append(Explosion(bomb.rct.center))
+                    exceptions.append(Explosion(bomb.rct.center)) # 爆発エフェクトを追加
                     bird.change_img(6, screen)
                     score.score += 1  # スコアを1点加算
                     pg.display.update()
