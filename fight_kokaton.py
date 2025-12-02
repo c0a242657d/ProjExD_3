@@ -75,17 +75,17 @@ class Bird:
         引数2 screen：画面Surface
         """
         sum_mv = [0, 0]
-        for k, mv in __class__.delta.items():
-            if key_lst[k]:
-                sum_mv[0] += mv[0]
-                sum_mv[1] += mv[1]
-        self.rct.move_ip(sum_mv)
-        if check_bound(self.rct) != (True, True):
-            self.rct.move_ip(-sum_mv[0], -sum_mv[1])
-        if not (sum_mv[0] == 0 and sum_mv[1] == 0):
-            self.img = __class__.imgs[tuple(sum_mv)]
-            self.dire = tuple(sum_mv)
-        screen.blit(self.img, self.rct)
+        for k, mv in __class__.delta.items():# kはキー，mvは移動量
+            if key_lst[k]:# 押下されているキーがあれば
+                sum_mv[0] += mv[0]# x方向の移動量を加算
+                sum_mv[1] += mv[1]# y方向の移動量を加算
+        self.rct.move_ip(sum_mv)# こうかとんを移動させる
+        if check_bound(self.rct) != (True, True):# 画面外なら
+            self.rct.move_ip(-sum_mv[0], -sum_mv[1])# 移動を元に戻す
+        if not (sum_mv[0] == 0 and sum_mv[1] == 0):# 移動量が(0,0)でなければ
+            self.img = __class__.imgs[tuple(sum_mv)]# 画像を変更
+            self.dire = tuple(sum_mv)# 進行方向を更新
+        screen.blit(self.img, self.rct)# 画面にこうかとんを転送
 
 
 
@@ -98,30 +98,30 @@ class Beam: #練習１
         ビーム画像Surfaceを生成する
         引数 bird：ビームを放つこうかとん（Birdインスタンス）
         """
-        self.img = pg.image.load(f"fig/beam.png")
-        self.rct = self.img.get_rect()
-        self.rct.centery = bird.rct.centery
-        self.rct.left = bird.rct.right
-        self.vx, self.vy = bird.dire
+        self.img = pg.image.load(f"fig/beam.png") # ビーム画像の読み込み
+        self.rct = self.img.get_rect() # ビーム画像のRect取得
+        self.rct.centery = bird.rct.centery # こうかとんの中心y座標に合わせる
+        self.rct.left = bird.rct.right # こうかとんの右端に合わせる
+        self.vx, self.vy = bird.dire # こうかとんの進行方向をビームの速度ベクトルに設定
 
-        th = math.atan2(-self.vy, self.vx)
-        deg = math.degrees(th)
-        self.img = pg.transform.rotozoom(self.img, deg, 1.0)
+        th = math.atan2(-self.vy, self.vx) # ビームの角度を計算
+        deg = math.degrees(th) # ラジアンを度に変換
+        self.img = pg.transform.rotozoom(self.img, deg, 1.0) # ビーム画像を回転
 
-        self.rct = self.img.get_rect()
+        self.rct = self.img.get_rect() # 回転後のビーム画像のRect取得
 
-        cx = bird.rct.centerx + (bird.rct.width * (self.vx / 5))
-        cy = bird.rct.centery + (bird.rct.height * (self.vy / 5))
-        self.rct.center = cx, cy
+        cx = bird.rct.centerx + (bird.rct.width * (self.vx / 5))   # こうかとんの中心x座標に合わせる
+        cy = bird.rct.centery + (bird.rct.height * (self.vy / 5))  # こうかとんの中心y座標に合わせる
+        self.rct.center = cx, cy # ビームの中心座標を設定
  
     def update(self, screen: pg.Surface):
         """
         ビームを速度ベクトルself.vx, self.vyに基づき移動させる
         引数 screen：画面Surface
         """
-        if check_bound(self.rct) == (True, True):
-            self.rct.move_ip(self.vx, self.vy)
-            screen.blit(self.img, self.rct)    
+        if check_bound(self.rct) == (True, True): # 画面内なら
+            self.rct.move_ip(self.vx, self.vy)  # ビームを移動させる
+            screen.blit(self.img, self.rct)   # 画面にビームを転送
 
 
 class Bomb:
@@ -134,19 +134,19 @@ class Bomb:
         引数1 color：爆弾円の色タプル
         引数2 rad：爆弾円の半径
         """
-        self.img = pg.Surface((2*rad, 2*rad))
-        pg.draw.circle(self.img, color, (rad, rad), rad)
-        self.img.set_colorkey((0, 0, 0))
-        self.rct = self.img.get_rect()
-        self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
-        self.vx, self.vy = +5, +5
+        self.img = pg.Surface((2*rad, 2*rad)) # 爆弾用Surface
+        pg.draw.circle(self.img, color, (rad, rad), rad) # 爆弾円を描画
+        self.img.set_colorkey((0, 0, 0)) # 黒色を透過色に設定
+        self.rct = self.img.get_rect() # 爆弾用Rect
+        self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)  # 爆弾の初期位置をランダムに設定
+        self.vx, self.vy = +5, +5  # 爆弾の速度ベクトル
 
     def update(self, screen: pg.Surface):
         """
         爆弾を速度ベクトルself.vx, self.vyに基づき移動させる
         引数 screen：画面Surface
         """
-        yoko, tate = check_bound(self.rct)
+        yoko, tate = check_bound(self.rct) # 爆弾の画面内外判定
         if not yoko:
             self.vx *= -1
         if not tate:
@@ -178,7 +178,14 @@ class Score:
         screen.blit(self.img, self.rct)
 
 class Explosion:
+    """
+    爆発エフェクトに関するクラス
+    """
     def __init__(self, center: tuple[int,int]):
+        """
+        爆発エフェクトの初期化
+        引数 center：爆発エフェクトの中心座標
+        """
         img0 = pg.image.load("fig/explosion.gif")
         img1 = pg.transform.flip(img0, True, False)
         self.img = [img0, img1]
@@ -189,12 +196,19 @@ class Explosion:
         self.life = 30 
         self.index = 0
     def update(self, screen: pg.Surface):
+        """
+        爆発エフェクトを画面に表示させる
+        引数 screen：画面Surface
+        """
         if self.life > 0:
             self.index = (self.index + 1) % 2
             screen.blit(self.img[self.index], self.rct)
             self.life -= 1
 
 def main():
+    """
+    メインループ
+    """
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
@@ -271,6 +285,9 @@ def main():
 
 
 if __name__ == "__main__":
+    """
+    メイン関数の呼び出し
+    """
     pg.init()
     main()
     pg.quit()
