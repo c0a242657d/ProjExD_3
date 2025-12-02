@@ -163,6 +163,23 @@ class Score:
         self.img = self.fonto.render(f"スコア：{self.score}", True, self.color)
         screen.blit(self.img, self.rct)
 
+class Explosion:
+    def __init__(self, center: tuple[int,int]):
+        img0 = pg.image.load("fig/explosion.gif")
+        img1 = pg.transform.flip(img0, True, False)
+        self.img = [img0, img1]
+
+        self.rct = self.img[0].get_rect()
+        self.rct.center = center
+
+        self.life = 30 
+        self.index = 0
+    def update(self, screen: pg.Surface):
+        if self.life > 0:
+            self.index = (self.index + 1) % 2
+            screen.blit(self.img[self.index], self.rct)
+            self.life -= 1
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -175,6 +192,7 @@ def main():
     clock = pg.time.Clock()
     tmr = 0
     score = Score()
+    exceptions = []
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -204,6 +222,7 @@ def main():
                     # ビームが爆弾に当たったら爆弾とビームを消す
                     bombs[x] = None
                     beams[y] = None
+                    exceptions.append(Explosion(bomb.rct.center))
                     bird.change_img(6, screen)
                     score.score += 1  # スコアを1点加算
                     pg.display.update()
@@ -212,10 +231,19 @@ def main():
             if beam is None:
                 continue
             if check_bound(beam.rct) != (True, True):
+                exception = Exception(beam.rct.center)
                 beams[y] = None  # ビームが画面外に出たら消す
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneをリストから削除
         beams = [beam for beam in beams if beam is not None]  # Noneをリストから削除
 
+
+        new_explosions = []
+        for ex in exceptions:
+            if ex.life > 0:
+                ex.update(screen)
+                new_explosions.append(ex)
+        exceptions = new_explosions
+        
         score.update(screen)
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
