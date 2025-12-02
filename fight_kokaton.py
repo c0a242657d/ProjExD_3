@@ -3,6 +3,7 @@ import random
 import sys
 import time
 import pygame as pg
+import math
 
 
 WIDTH = 1100  # ゲームウィンドウの幅
@@ -56,6 +57,7 @@ class Bird:
         self.img = __class__.imgs[(+5, 0)]
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
+        self.dire=(+5, 0)
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -82,7 +84,9 @@ class Bird:
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
             self.img = __class__.imgs[tuple(sum_mv)]
+            self.dire = tuple(sum_mv)
         screen.blit(self.img, self.rct)
+
 
 
 class Beam: #練習１
@@ -98,8 +102,18 @@ class Beam: #練習１
         self.rct = self.img.get_rect()
         self.rct.centery = bird.rct.centery
         self.rct.left = bird.rct.right
-        self.vx, self.vy = +5, 0
+        self.vx, self.vy = bird.dire
 
+        th = math.atan2(-self.vy, self.vx)
+        deg = math.degrees(th)
+        self.img = pg.transform.rotozoom(self.img, deg, 1.0)
+
+        self.rct = self.img.get_rect()
+
+        cx = bird.rct.centerx + (bird.rct.width * (self.vx / 5))
+        cy = bird.rct.centery + (bird.rct.height * (self.vy / 5))
+        self.rct.center = cx, cy
+ 
     def update(self, screen: pg.Surface):
         """
         ビームを速度ベクトルself.vx, self.vyに基づき移動させる
