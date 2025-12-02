@@ -168,7 +168,7 @@ def main():
         if bomb is not None:
             if beam is not None:
                 if beam.rct.colliderect(bomb.rct):
-                    # ビームが爆弾に当たったら爆弾を消す
+                    # ビームが爆弾に当たったら爆弾とビームを消す
                     bomb = None
                     beam = None
 
